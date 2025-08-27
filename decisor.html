@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINHA LISTA DE FILMES</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --primary-color: #1f2a38;
+            --secondary-color: #161b22;
+            --border-color: #30363d;
+            --text-color: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-color: #58a6ff;
+            --glow-color: #00aaff;
+            --success-color: #238636;
+            --danger-color: #da3633;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--secondary-color); }
+        ::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 20px; }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-color); }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 1px 1px, rgba(88, 166, 255, 0.1) 1px, transparent 0);
+            background-size: 25px 25px;
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color);
+        }
+        header h1 .fa-film { color: var(--glow-color); }
+        header p { color: var(--text-secondary); }
+
+        .panel {
+            background: rgba(22, 27, 34, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0 0.75rem;
+            flex-grow: 1;
+            transition: all 0.3s ease;
+        }
+        .input-group:focus-within {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+        }
+        .input-group i { color: var(--text-secondary); }
+        
+        input[type="text"], input[type="number"], select {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            padding: 0.75rem 0.5rem;
+            width: 100%;
+            outline: none;
+        }
+        
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-glow {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+        }
+        .btn-glow:hover {
+            background: #6ab0ff;
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.6);
+            transform: translateY(-2px);
+        }
+        .btn-success { background: var(--success-color); color: white; }
+        
+        #lista-filmes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .card-filme {
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 2 / 3;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            cursor: pointer;
+        }
+        
+        .card-filme::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: conic-gradient(from 90deg at 50% 50%, var(--glow-color), #e91e63, #ffeb3b, var(--glow-color));
+            z-index: -1;
+            border-radius: 14px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .card-filme:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow);
+        }
+        .card-filme:hover::before { opacity: 1; }
+        .card-filme:hover .poster-overlay { background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.9) 80%); }
+
+        .poster-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.4s ease;
+        }
+        .card-filme:hover .poster-bg { transform: scale(1.1); }
+        
+        .poster-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.8) 90%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            transition: background 0.4s ease;
+        }
+
+        .card-filme .info h3 {
+            margin: 0 0 0.25rem 0;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .card-filme .info p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .card-acoes {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: rgba(13, 17, 23, 0.7);
+            backdrop-filter: blur(5px);
+            padding: 0.75rem;
+            border-radius: 8px;
+            transform: translateX(150%);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        .card-filme:hover .card-acoes {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .card-acoes button, .card-acoes a {
+            background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.1rem; transition: all 0.2s;
+        }
+        .card-acoes button:hover, .card-acoes a:hover { color: var(--accent-color); transform: scale(1.2); }
+        .card-acoes .assistido-btn.assistido { color: var(--success-color); }
+        .card-acoes .assistido-btn.assistido:hover { color: #35a249; }
+
+
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); animation: fadeIn 0.3s; }
+        .modal-conteudo { background: var(--primary-color); margin: 10% auto; padding: 2rem; border: 1px solid var(--border-color); width: 90%; max-width: 500px; border-radius: 12px; position: relative; animation: slideIn 0.3s; box-shadow: var(--shadow); }
+        .fechar { color: var(--text-secondary); position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; font-weight: bold; cursor: pointer; transition: color 0.2s; }
+        .fechar:hover { color: var(--danger-color); }
+        
+        .form-grupo label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); }
+        #modal-resultado .resultado-filme { text-align: center; }
+        #modal-resultado h2 { color: var(--text-secondary); font-weight: 400; }
+        #modal-resultado h1 { color: var(--accent-color); text-shadow: 0 0 10px var(--glow-color); }
+        #resultado-poster { max-width: 80%; height: auto; border-radius: 8px; margin-top: 20px; box-shadow: var(--shadow); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Roleta */
+        .roleta-container { position: relative; width: 350px; height: 350px; margin: 30px auto; }
+        #roleta { width: 100%; height: 100%; border-radius: 50%; border: 10px solid #fff; position: relative; overflow: hidden; transition: transform 6s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 0 20px rgba(0,0,0,0.5) inset, 0 0 15px var(--glow-color); }
+        .roleta-setor { position: absolute; width: 50%; height: 50%; top: 50%; left: 50%; transform-origin: 0% 0%; overflow: hidden; }
+        .roleta-setor span { position: absolute; transform: rotate(20deg) translateX(20px); color: white; font-weight: bold; font-size: 12px; text-shadow: 1px 1px 2px black; }
+        #roleta-ponteiro { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 30px solid var(--danger-color); z-index: 2; filter: drop-shadow(0 -2px 3px rgba(0,0,0,0.4)); }
+        #nenhum-filme-msg { text-align: center; padding: 40px; color: var(--text-secondary); display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-film"></i> MINHA LISTA</h1>
+            <p>Sua lista de filmes pessoal.</p>
+        </header>
+
+        <section class="panel">
+            <button id="btn-add-filme" class="btn btn-glow"><i class="fas fa-plus"></i> Adicionar Filme</button>
+            <div class="input-group">
+                <i class="fas fa-search"></i>
+                <input type="text" id="filtro-nome" placeholder="Pesquisar por nome...">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-tag"></i>
+                <select id="filtro-genero">
+                    <option value="">Todos os Gêneros</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-eye"></i>
+                <select id="filtro-assistido">
+                    <option value="todos">Todos os Filmes</option>
+                    <option value="nao-assistido" selected>Para Assistir</option>
+                    <option value="assistido">Já Assistidos</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h3>Não consegue decidir?</h3>
+            <button id="btn-sugestao" class="btn btn-glow"><i class="fas fa-dice"></i> Sugestão Rápida</button>
+            <button id="btn-roleta" class="btn btn-glow"><i class="fas fa-dharmachakra"></i> Girar a Roleta!</button>
+        </section>
+
+        <main id="lista-filmes"></main>
+        <div id="nenhum-filme-msg">
+            <h2>Nenhum filme encontrado.</h2>
+            <p>Tente ajustar os filtros ou adicione novos filmes à sua lista!</p>
+        </div>
+    </div>
+
+    <!-- Modais (mesma estrutura, novo visual) -->
+    <div id="modal-filme" class="modal">
+        <div class="modal-conteudo">
+            <span class="fechar">&times;</span>
+            <h2 id="modal-titulo">Adicionar Novo Filme</h2>
+            <form id="form-filme">
+                <input type="hidden" id="filme-id">
+                <div class="form-grupo">
+                    <label for="titulo">Título</label>
+                    <div class="input-group"><input type="text" id="titulo" required></div>
+                </div>
+                <div class="form-grupo">
+                    <label for="genero">Gênero</label>
+                    <div class="input-group"><input type="text" id="genero" required placeholder="Ex: Ação, Comédia"></div>
+                </div>
+                <div class="form-grupo">
+                    <label for="ano">Ano</label>
+                    <div class="input-group"><input type="number" id="ano" min="1900" max="2099" required></div>
+                </div>
+                <div class="form-grupo">
+                    <label for="poster">URL do Pôster (Opcional)</label>
+                    <div class="input-group"><input type="text" id="poster" placeholder="Cole o link da imagem"></div>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fas fa-save"></i> Salvar Filme</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="modal-resultado" class="modal">
+        <div class="modal-conteudo">
+            <span class="fechar">&times;</span>
+            <div class="resultado-filme">
+                <h2>O filme escolhido é...</h2>
+                <h1 id="resultado-titulo"></h1>
+                <p id="resultado-detalhes"></p>
+                <img id="resultado-poster" src="" alt="Pôster do Filme">
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-roleta" class="modal">
+        <div class="modal-conteudo" style="text-align: center;">
+            <span class="fechar">&times;</span>
+            <h2>Gire para decidir!</h2>
+            <div class="roleta-container">
+                <div id="roleta-ponteiro"></div>
+                <div id="roleta"></div>
+            </div>
+            <button id="girar-roleta-btn" class="btn btn-success" style="padding: 1rem 2rem;"><i class="fas fa-play"></i> Girar!</button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // JS é o mesmo da versão anterior, mas com a renderização do card atualizada
+        const btnAddFilme = document.getElementById('btn-add-filme');
+        const modalFilme = document.getElementById('modal-filme');
+        const modalResultado = document.getElementById('modal-resultado');
+        const modalRoleta = document.getElementById('modal-roleta');
+        const fecharModais = document.querySelectorAll('.fechar');
+        const formFilme = document.getElementById('form-filme');
+        const listaFilmesEl = document.getElementById('lista-filmes');
+        const filtroNome = document.getElementById('filtro-nome');
+        const filtroGenero = document.getElementById('filtro-genero');
+        const filtroAssistido = document.getElementById('filtro-assistido');
+        const btnSugestao = document.getElementById('btn-sugestao');
+        const btnRoleta = document.getElementById('btn-roleta');
+        const girarRoletaBtn = document.getElementById('girar-roleta-btn');
+        const nenhumFilmeMsg = document.getElementById('nenhum-filme-msg');
+
+        let filmes = [];
+
+        const carregarFilmes = () => {
+            const filmesSalvos = localStorage.getItem('meusFilmes');
+            if (filmesSalvos && filmesSalvos !== '[]') {
+                filmes = JSON.parse(filmesSalvos);
+            } else {
+                filmes = [
+                    { id: 1, titulo: 'Blade Runner 2049', genero: 'Sci-Fi, Drama', ano: 2017, poster: 'https://m.media-amazon.com/images/M/MV5BNzA1Njg4NzYxOV5BMl5BanBnXkFtZTgwODk5NjU3MzI@._V1_SX300.jpg', assistido: false },
+                    { id: 2, titulo: 'Clube da Luta', genero: 'Drama', ano: 1999, poster: 'https://m.media-amazon.com/images/M/MV5BNDIzNDU0YzEtYzE5Ni00ZjlkLTk5ZjgtNjM3NWE4YzA3Nzk3XkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_SX300.jpg', assistido: true },
+                    { id: 3, titulo: 'Duna', genero: 'Sci-Fi, Aventura', ano: 2021, poster: 'https://m.media-amazon.com/images/M/MV5BN2FjNmEyNWMtYzM0ZS00NjIyLTg5YzYtYThlMGVjNzE1OGViXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SX300.jpg', assistido: false },
+                    { id: 4, titulo: 'Oppenheimer', genero: 'Biografia, Drama', ano: 2023, poster: 'https://m.media-amazon.com/images/M/MV5BMDBmYTZjNjUtN2M1MS00MTQ2LTk2ODgtNzc2M2QyZGE5NTVjXkEyXkFqcGdeQXVyNzAwMjU2MTY@._V1_SX300.jpg', assistido: false }
+                ];
+            }
+            renderizarFilmes();
+            atualizarFiltroGeneros();
+        };
+
+        const salvarFilmes = () => {
+            localStorage.setItem('meusFilmes', JSON.stringify(filmes));
+        };
+        
+        const getFilmesFiltrados = () => {
+            const termoBusca = filtroNome.value.toLowerCase();
+            const generoSelecionado = filtroGenero.value;
+            const statusAssistido = filtroAssistido.value;
+
+            return filmes.filter(filme => {
+                const correspondeNome = filme.titulo.toLowerCase().includes(termoBusca);
+                const correspondeGenero = !generoSelecionado || filme.genero.toLowerCase().split(',').map(g=>g.trim()).includes(generoSelecionado.toLowerCase());
+                
+                if (statusAssistido === 'assistido') return correspondeNome && correspondeGenero && filme.assistido;
+                if (statusAssistido === 'nao-assistido') return correspondeNome && correspondeGenero && !filme.assistido;
+                
+                return correspondeNome && correspondeGenero;
+            });
+        };
+        
+        // FUNÇÃO DE RENDERIZAÇÃO ATUALIZADA PARA O NOVO DESIGN DOS CARDS
+        const renderizarFilmes = () => {
+            listaFilmesEl.innerHTML = '';
+            const filmesFiltrados = getFilmesFiltrados();
+
+            nenhumFilmeMsg.style.display = filmesFiltrados.length === 0 ? 'block' : 'none';
+
+            filmesFiltrados.forEach(filme => {
+                const card = document.createElement('div');
+                card.className = 'card-filme';
+                card.dataset.id = filme.id;
+                
+                const posterStyle = filme.poster ? `background-image: url('${filme.poster}')` : '';
+                const bgColor = filme.poster ? '' : `style="background-color: #111;"`;
+
+                card.innerHTML = `
+                    <div class="poster-bg" style="${posterStyle}" ${bgColor}></div>
+                    <div class="poster-overlay">
+                        <div class="info">
+                            <h3>${filme.titulo}</h3>
+                            <p>${filme.genero} • ${filme.ano}</p>
+                        </div>
+                    </div>
+                    <div class="card-acoes">
+                        <button class="assistido-btn ${filme.assistido ? 'assistido' : ''}" title="Marcar como assistido">
+                            <i class="fas ${filme.assistido ? 'fa-check-circle' : 'fa-circle'}"></i>
+                        </button>
+                        <button class="editar-btn" title="Editar"><i class="fas fa-edit"></i></button>
+                        <a href="https://www.google.com/search?q=${encodeURIComponent(filme.titulo + ' filme')}" target="_blank" title="Mais informações">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                        <button class="excluir-btn" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                listaFilmesEl.appendChild(card);
+            });
+        };
+
+        const atualizarFiltroGeneros = () => {
+            const generos = new Set();
+            filmes.forEach(filme => {
+                filme.genero.split(',').forEach(g => {
+                    if(g.trim()) generos.add(g.trim());
+                });
+            });
+
+            const generoAtual = filtroGenero.value;
+            filtroGenero.innerHTML = '<option value="">Todos os Gêneros</option>';
+            [...generos].sort().forEach(genero => {
+                const option = document.createElement('option');
+                option.value = genero.toLowerCase();
+                option.textContent = genero;
+                filtroGenero.appendChild(option);
+            });
+            filtroGenero.value = generoAtual;
+        };
+
+        const abrirModal = (modal, titulo = 'Adicionar Novo Filme', filme = null) => {
+            const form = modal.querySelector('form');
+            if (form) {
+                form.reset();
+                document.getElementById('modal-titulo').textContent = titulo;
+                if (filme) {
+                    document.getElementById('filme-id').value = filme.id;
+                    document.getElementById('titulo').value = filme.titulo;
+                    document.getElementById('genero').value = filme.genero;
+                    document.getElementById('ano').value = filme.ano;
+                    document.getElementById('poster').value = filme.poster;
+                } else {
+                    document.getElementById('filme-id').value = '';
+                }
+            }
+            modal.style.display = 'block';
+        };
+
+        const fecharModal = () => {
+            modalFilme.style.display = 'none';
+            modalResultado.style.display = 'none';
+            modalRoleta.style.display = 'none';
+        };
+
+        btnAddFilme.onclick = () => abrirModal(modalFilme);
+        fecharModais.forEach(btn => btn.onclick = fecharModal);
+        window.onclick = (event) => {
+            if (event.target.classList.contains('modal')) {
+                fecharModal();
+            }
+        };
+
+        formFilme.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('filme-id').value;
+            const novoFilme = {
+                titulo: document.getElementById('titulo').value,
+                genero: document.getElementById('genero').value,
+                ano: parseInt(document.getElementById('ano').value),
+                poster: document.getElementById('poster').value,
+                assistido: false
+            };
+
+            if (id) {
+                const index = filmes.findIndex(f => f.id == id);
+                novoFilme.id = parseInt(id);
+                novoFilme.assistido = filmes[index].assistido;
+                filmes[index] = novoFilme;
+            } else {
+                novoFilme.id = Date.now();
+                filmes.push(novoFilme);
+            }
+
+            salvarFilmes();
+            renderizarFilmes();
+            atualizarFiltroGeneros();
+            fecharModal();
+        });
+        
+        listaFilmesEl.addEventListener('click', (e) => {
+            const card = e.target.closest('.card-filme');
+            if (!card) return;
+            const id = parseInt(card.dataset.id);
+            const filme = filmes.find(f => f.id === id);
+
+            if (e.target.closest('.editar-btn')) {
+                abrirModal(modalFilme, 'Editar Filme', filme);
+            } else if (e.target.closest('.excluir-btn')) {
+                if (confirm(`Tem certeza que deseja excluir "${filme.titulo}"?`)) {
+                    filmes = filmes.filter(f => f.id !== id);
+                    salvarFilmes();
+                    renderizarFilmes();
+                    atualizarFiltroGeneros();
+                }
+            } else if (e.target.closest('.assistido-btn')) {
+                filme.assistido = !filme.assistido;
+                salvarFilmes();
+                renderizarFilmes();
+            }
+        });
+
+        [filtroNome, filtroGenero, filtroAssistido].forEach(el => {
+            el.addEventListener('input', renderizarFilmes);
+            el.addEventListener('change', renderizarFilmes);
+        });
+
+        const escolherFilmeAleatorio = () => {
+            const filmesParaAssistir = getFilmesFiltrados().filter(f => !f.assistido);
+            
+            if (filmesParaAssistir.length === 0) {
+                alert('Nenhum filme para assistir com os filtros atuais.');
+                return null;
+            }
+            return filmesParaAssistir[Math.floor(Math.random() * filmesParaAssistir.length)];
+        };
+
+        btnSugestao.onclick = () => {
+            const filmeEscolhido = escolherFilmeAleatorio();
+            if (filmeEscolhido) {
+                document.getElementById('resultado-titulo').textContent = filmeEscolhido.titulo;
+                document.getElementById('resultado-detalhes').textContent = `${filmeEscolhido.genero} - ${filmeEscolhido.ano}`;
+                document.getElementById('resultado-poster').src = filmeEscolhido.poster || '';
+                document.getElementById('resultado-poster').style.display = filmeEscolhido.poster ? 'block' : 'none';
+                abrirModal(modalResultado);
+            }
+        };
+
+        let filmesRoleta = [];
+        const cores = ['#3f51b5', '#e91e63', '#9c27b0', '#009688', '#ff9800', '#795548', '#f44336'];
+        
+        const criarRoleta = () => {
+            filmesRoleta = getFilmesFiltrados().filter(f => !f.assistido);
+            const roletaEl = document.getElementById('roleta');
+            roletaEl.innerHTML = '';
+            
+            if (filmesRoleta.length < 2) {
+                alert("Você precisa de pelo menos 2 filmes 'Para Assistir' com os filtros atuais para usar a roleta.");
+                return false;
+            }
+
+            const anguloSetor = 360 / filmesRoleta.length;
+            
+            filmesRoleta.forEach((filme, i) => {
+                const setor = document.createElement('div');
+                setor.className = 'roleta-setor';
+                
+                const angulo = anguloSetor * i;
+                setor.style.transform = `rotate(${angulo}deg) skewY(${90 - anguloSetor}deg)`;
+                setor.style.backgroundColor = cores[i % cores.length];
+
+                const texto = document.createElement('span');
+                texto.textContent = filme.titulo.length > 15 ? filme.titulo.substring(0, 13) + '...' : filme.titulo;
+                texto.style.transform = `skewY(${-(90 - anguloSetor)}deg) rotate(${anguloSetor / 2}deg)`;
+                
+                setor.appendChild(texto);
+                roletaEl.appendChild(setor);
+            });
+            return true;
+        };
+
+        btnRoleta.onclick = () => {
+            if (criarRoleta()) {
+                abrirModal(modalRoleta);
+            }
+        };
+        
+        girarRoletaBtn.addEventListener('click', () => {
+            const roletaEl = document.getElementById('roleta');
+            const anguloSetor = 360 / filmesRoleta.length;
+            const indiceVencedor = Math.floor(Math.random() * filmesRoleta.length);
+            const filmeVencedor = filmesRoleta[indiceVencedor];
+
+            const voltas = 5 * 360;
+            const posicaoFinal = -(anguloSetor * indiceVencedor);
+            const desvio = (Math.random() * anguloSetor * 0.8) + (anguloSetor * 0.1);
+            const anguloTotal = voltas + posicaoFinal - desvio;
+            
+            roletaEl.style.transform = `rotate(${anguloTotal}deg)`;
+            girarRoletaBtn.disabled = true;
+
+            setTimeout(() => {
+                fecharModal();
+                document.getElementById('resultado-titulo').textContent = filmeVencedor.titulo;
+                document.getElementById('resultado-detalhes').textContent = `${filmeVencedor.genero} - ${filmeVencedor.ano}`;
+                document.getElementById('resultado-poster').src = filmeVencedor.poster || '';
+                document.getElementById('resultado-poster').style.display = filmeVencedor.poster ? 'block' : 'none';
+                abrirModal(modalResultado);
+                roletaEl.style.transition = 'none';
+                roletaEl.style.transform = 'rotate(0deg)';
+                setTimeout(() => roletaEl.style.transition = 'transform 6s cubic-bezier(0.25, 1, 0.5, 1)', 50);
+                girarRoletaBtn.disabled = false;
+            }, 6100);
+        });
+
+        carregarFilmes();
+    });
+    </script>
+</body>
+</html>
